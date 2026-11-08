@@ -1,0 +1,110 @@
+// Schema do banco de dados (SQLite) da academia.
+// Cada "model" vira uma tabela.
+
+generator client {
+  provider = "prisma-client"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+// Login do sistema. perfil: "ADMIN" (dona da academia) ou "ALUNO".
+model Usuario {
+  id          Int      @id @default(autoincrement())
+  nome        String
+  email       String   @unique
+  senhaHash   String
+  perfil      String   @default("ALUNO")
+  trocarSenha Boolean  @default(true) // aluno criado pelo admin deve trocar a senha inicial
+  criadoEm    DateTime @default(now())
+
+  aluno Aluno?
+}
+
+// Planos mensais: o valor varia conforme os dias de treino por semana.
+model Plano {
+  id            Int     @id @default(autoincrement())
+  nome          String
+  diasPorSemana Int
+  valor         Float
+  ativo         Boolean @default(true)
+
+  alunos Aluno[]
+}
+
+model Aluno {
+  id                    Int      @id @default(autoincrement())
+  usuarioId             Int      @unique
+  planoId               Int
+  telefone              String
+  dataNascimento        String // formato AAAA-MM-DD
+  sexo                  String // "M", "F" ou "O"
+  foto                  String? // nome do arquivo em /uploads
+  diaVencimento         Int // 1 a 28
+  diasTreino            String // dias separados por vírgula, ex.: "SEG,QUA,SEX"
+  possuiRestricaoMedica Boolean  @default(false)
+  observacoes           String?
+  ativo                 Boolean  @default(true)
+  criadoEm              DateTime @default(now())
+
+  usuario    Usuario     @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
+  plano      Plano       @relation(fields: [planoId], references: [id])
+  pagamentos Pagamento[]
+  treinos    Treino[]
+}
+
+model Pagamento {
+  id             Int      @id @default(autoincrement())
+  alunoId        Int
+  mesReferencia  String // formato AAAA-MM
+  valor          Float
+  formaPagamento String // "PIX", "CARTAO" ou "DINHEIRO"
+  pago           Boolean  @default(false)
+  dataPagamento  String? // formato AAAA-MM-DD
+  criadoEm       DateTime @default(now())
+
+  aluno Aluno @relation(fields: [alunoId], references: [id], onDelete: Cascade)
+
+  @@unique([alunoId, mesReferencia])
+}
+
+model Exercicio {
+  id             Int     @id @default(autoincrement())
+  nome           String
+  grupoMuscular  String // ex.: "PEITO", "COSTAS", "PERNAS"
+  imagem         String?
+  descricao      String?
+  ativo          Boolean @default(true)
+
+  itens TreinoExercicio[]
+}
+
+// Ficha de treino de um aluno (ex.: "Treino A - Peito e Tríceps").
+model Treino {
+  id          Int      @id @default(autoincrement())
+  alunoId     Int
+  nome        String
+  observacoes String?
+  ativo       Boolean  @default(true)
+  criadoEm    DateTime @default(now())
+
+  aluno Aluno             @relation(fields: [alunoId], references: [id], onDelete: Cascade)
+  itens TreinoExercicio[]
+}
+
+// Exercícios que compõem um treino, com séries, repetições e carga.
+model TreinoExercicio {
+  id               Int     @id @default(autoincrement())
+  treinoId         Int
+  exercicioId      Int
+  ordem            Int
+  series           Int
+  repeticoes       String // texto para aceitar "12", "10-12" ou "até a falha"
+  carga            Float?
+  descansoSegundos Int?
+
+  treino    Treino    @relation(fields: [treinoId], references: [id], onDelete: Cascade)
+  exercicio Exercicio @relation(fields: [exercicioId], references: [id])
+}
