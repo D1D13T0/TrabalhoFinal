@@ -1,4 +1,5 @@
 import { useAuth } from "@/contexts/AuthContext";
+import { router } from "expo-router";
 import { DrawerContentScrollView, DrawerItemList, type DrawerContentComponentProps } from "expo-router/drawer";
 import { StyleSheet, View } from "react-native";
 import { Divider, Drawer as PaperDrawer, Text, useTheme } from "react-native-paper";
@@ -23,6 +24,14 @@ export function MenuLateral(props: DrawerContentComponentProps) {
       <Divider style={styles.divisor} />
       <DrawerItemList {...props} />
       <Divider style={styles.divisor} />
+      <PaperDrawer.Item
+        label="Alterar minha senha"
+        icon="lock-outline"
+        onPress={() => {
+          props.navigation.closeDrawer();
+          router.push("/trocar-senha");
+        }}
+      />
       <PaperDrawer.Item label="Sair" icon="logout" onPress={sair} />
     </DrawerContentScrollView>
   );

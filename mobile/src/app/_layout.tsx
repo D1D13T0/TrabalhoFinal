@@ -56,7 +56,7 @@ function Navegacao() {
         <Stack.Screen name="login" />
       </Stack.Protected>
 
-      <Stack.Protected guard={!!precisaTrocarSenha}>
+      <Stack.Protected guard={logado}>
         <Stack.Screen name="trocar-senha" />
       </Stack.Protected>
 

@@ -5,7 +5,7 @@ import { criarTreinoLocalDAO } from "@/database/TreinoLocalDAO";
 import type { Aluno } from "@/models";
 import { alunoAreaService } from "@/services/alunoAreaService";
 import { formatarMoeda } from "@/utils/formatacao";
-import { useFocusEffect } from "expo-router";
+import { router, useFocusEffect } from "expo-router";
 import { useSQLiteContext } from "expo-sqlite";
 import { useCallback, useState } from "react";
 import { ScrollView, StyleSheet, View } from "react-native";
@@ -56,6 +56,12 @@ export default function PerfilScreen() {
       )}
 
       <Surface style={styles.secao} elevation={1}>
+        <List.Item
+          title="Alterar minha senha"
+          left={(p) => <List.Icon {...p} icon="lock-outline" />}
+          onPress={() => router.push("/trocar-senha")}
+        />
+        <Divider />
         <List.Item
           title="Limpar dados offline"
           description="Apaga a cópia dos treinos salva neste celular"

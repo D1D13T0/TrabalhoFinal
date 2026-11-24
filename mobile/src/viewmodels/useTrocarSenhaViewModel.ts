@@ -4,7 +4,7 @@ import { ApiError } from "@/services/api";
 import { authService } from "@/services/authService";
 import { useState } from "react";
 
-export function useTrocarSenhaViewModel() {
+export function useTrocarSenhaViewModel(aoSalvar?: () => void) {
   const { senhaTrocada, sair } = useAuth();
   const { mostrarMensagem } = useMensagem();
   const [senhaAtual, setSenhaAtual] = useState("");
@@ -30,6 +30,7 @@ export function useTrocarSenhaViewModel() {
       await authService.trocarSenha(senhaAtual, novaSenha);
       mostrarMensagem("Senha alterada com sucesso!");
       senhaTrocada();
+      aoSalvar?.();
     } catch (e) {
       if (e instanceof ApiError && e.status === 400) setErros({ senhaAtual: e.message });
       else mostrarMensagem(e instanceof Error ? e.message : "Erro ao trocar a senha.", "erro");
